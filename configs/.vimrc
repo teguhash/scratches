@@ -8,17 +8,20 @@ call vundle#begin()
 Plugin 'VundleVim/Vundle.vim'
 "git interface
 Plugin 'tpope/vim-fugitive'
+Plugin 'airblade/vim-gitgutter'
 "filesystem
 Plugin 'scrooloose/nerdtree'
+Plugin 'Xuyuanp/nerdtree-git-plugin'
 Plugin 'jistr/vim-nerdtree-tabs'
 Plugin 'kien/ctrlp.vim' 
 
+"search
+Plugin 'google/vim-searchindex'
+set rtp+=/usr/local/opt/fzf
+Plugin 'junegunn/fzf.vim'
+
+
 "html
-"  isnowfy only compatible with python not python3
-"Plugin 'isnowfy/python-vim-instant-markdown'
-"Plugin 'jtratner/vim-flavored-markdown'
-"Plugin 'suan/vim-instant-markdown'
-"Plugin 'nelstrom/vim-markdown-preview'
 "python sytax checker
 Plugin 'nvie/vim-flake8'
 "Plugin 'vim-scripts/Pydiction'
@@ -31,6 +34,8 @@ Plugin 'scrooloose/syntastic'
 Plugin 'klen/rope-vim'
 Plugin 'davidhalter/jedi-vim'
 Plugin 'ervandew/supertab'
+Plugin 'majutsushi/tagbar'
+Plugin 'vim-scripts/simple-pairs'
 ""code folding
 "Plugin 'tmhedberg/SimpylFold'
 
@@ -41,10 +46,20 @@ Plugin 'jnurmine/Zenburn'
 "Visual
 Plugin 'vim-airline/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
+Plugin 'yuttie/comfortable-motion.vim'
+Plugin 'nathanaelkane/vim-indent-guides'
+
+
+"Shell
+"Plugin 'shougo/deol.nvim'
+
+"surround
+Plugin 'tpope/vim-surround'
+
 
 call vundle#end()
 
-filetype plugin indent on    " enables filetype detection
+filetype plugin indent on
 "let g:SimpylFold_docstring_preview = 1
 
 "autocomplete
@@ -66,8 +81,12 @@ set noswapfile
 "turn on numbering
 set nu
 
+"always show gutter
+set signcolumn=yes
+
 "python with virtualenv support
-py << EOF
+
+python << EOF
 import os.path
 import sys
 import vim
@@ -129,7 +148,6 @@ nnoremap <space> za
 "js stuff"
 autocmd FileType javascript setlocal shiftwidth=2 tabstop=2
 
-
 "NERDTree settings
 let g:NERDTreeNodeDelimiter = "\u00a0"
 autocmd StdinReadPre * let s:std_in=1
@@ -137,3 +155,17 @@ autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
 autocmd VimEnter * if argc() == 1 && isdirectory(argv()[0]) && !exists("s:std_in") | exe 'NERDTree' argv()[0] | wincmd p | ene | endif
 autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 map <C-n> :NERDTreeToggle<CR>
+
+"Tagbar toggle
+let g:Tlist_Ctags_Cmd='/usr/local/Cellar/ctags/5.8_1/bin/ctags'
+nmap <C-l> :TagbarToggle<CR>
+
+"Flake8 settings"
+autocmd BufWritePost *.py call Flake8()
+autocmd FileType python map <buffer> <leader>f :call Flake8()<CR>
+
+"set syntastic to passive on python
+let g:syntastic_mode_map = {
+        \ "mode": "active",
+        \ "active_filetypes": [],
+        \ "passive_filetypes": ["python"] }
