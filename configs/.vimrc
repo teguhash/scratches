@@ -13,13 +13,13 @@ Plugin 'airblade/vim-gitgutter'
 Plugin 'scrooloose/nerdtree'
 Plugin 'Xuyuanp/nerdtree-git-plugin'
 Plugin 'jistr/vim-nerdtree-tabs'
-Plugin 'kien/ctrlp.vim' 
+Plugin 'kien/ctrlp.vim'
 
 "search
 Plugin 'google/vim-searchindex'
 set rtp+=/usr/local/opt/fzf
 Plugin 'junegunn/fzf.vim'
-
+Plugin 'mileszs/ack.vim'
 
 "html
 "python sytax checker
@@ -49,13 +49,18 @@ Plugin 'vim-airline/vim-airline-themes'
 Plugin 'yuttie/comfortable-motion.vim'
 Plugin 'nathanaelkane/vim-indent-guides'
 
-
 "Shell
 "Plugin 'shougo/deol.nvim'
 
 "surround
 Plugin 'tpope/vim-surround'
 
+"utilities
+Plugin 'christoomey/vim-tmux-navigator'
+
+"typescript"
+Plugin 'leafgarland/typescript-vim'
+Plugin 'peitalin/vim-jsx-typescript'''''
 
 call vundle#end()
 
@@ -93,37 +98,44 @@ import vim
 if 'VIRTUAL_ENV' in os.environ:
   project_base_dir = os.environ['VIRTUAL_ENV']
   sys.path.insert(0, project_base_dir)
-  activate_this = os.path.join(project_base_dir,'bin/activate_this.py')
+  activate_this = os.path.join(project_base_dir, 'bin/activate_this.py')
   execfile(activate_this, dict(__file__=activate_this))
 EOF
+
+"Setting python filetype"
+au! BufNewFile,BufReadPost *.{py,pyc,pyw} set filetype=python foldmethod=indent
 
 "it would be nice to set tag files by the active virtualenv here
 ":set tags=~/mytags "tags for ctags and taglist
 "omnicomplete
 autocmd FileType python set omnifunc=pythoncomplete#Complete
 
+" add yaml stuffs
+au! BufNewFile,BufReadPost *.{yaml,yml} set filetype=yaml foldmethod=indent
+autocmd FileType yaml setlocal ts=2 sts=2 sw=2 expandtab
+
 "------------Start Python PEP 8 stuff----------------
 " Number of spaces that a pre-existing tab is equal to.
-au BufRead,BufNewFile *py,*pyw,*.c,*.h set tabstop=4
+au BufRead, BufNewFile *py, *pyw, *.c, *.h set tabstop=4
 
 "spaces for indents
-au BufRead,BufNewFile *.py,*pyw set shiftwidth=4
-au BufRead,BufNewFile *.py,*.pyw set expandtab
-au BufRead,BufNewFile *.py set softtabstop=4
+au BufRead, BufNewFile *.py, *pyw set shiftwidth=4
+au BufRead, BufNewFile *.py, *.pyw set expandtab
+au BufRead, BufNewFile *.py set softtabstop=4
 
 " Use the below highlight group when displaying bad whitespace is desired.
 highlight BadWhitespace ctermbg=red guibg=red
 
 " Display tabs at the beginning of a line in Python mode as bad.
-au BufRead,BufNewFile *.py,*.pyw match BadWhitespace /^\t\+/
+au BufRead, BufNewFile *.py, *.pyw match BadWhitespace /^\t\+/
 " Make trailing whitespace be flagged as bad.
-au BufRead,BufNewFile *.py,*.pyw,*.c,*.h match BadWhitespace /\s\+$/
+au BufRead, BufNewFile *.py, *.pyw, *.c, *.h match BadWhitespace /\s\+$/
 
 " Wrap text after a certain number of characters
-au BufRead,BufNewFile *.py,*.pyw, set textwidth=100
+au BufRead, BufNewFile *.py, *.pyw, set textwidth=100
 
 " Use UNIX (\n) line endings.
-au BufNewFile *.py,*.pyw,*.c,*.h set fileformat=unix
+au BufNewFile *.py, *.pyw, *.c, *.h set fileformat=unix
 
 " Set the default file encoding to UTF-8:
 set encoding=utf-8
@@ -138,11 +150,10 @@ autocmd FileType python set autoindent
 " make backspaces more powerfull
 set backspace=indent,eol,start
 
-
 "Folding based on indentation:
 autocmd FileType python set foldmethod=indent
 "use space to open folds
-nnoremap <space> za 
+nnoremap <leader> za
 "----------Stop python PEP 8 stuff--------------
 
 "js stuff"
@@ -158,10 +169,10 @@ map <C-n> :NERDTreeToggle<CR>
 
 "Tagbar toggle
 let g:Tlist_Ctags_Cmd='/usr/local/Cellar/ctags/5.8_1/bin/ctags'
-nmap <C-l> :TagbarToggle<CR>
+nmap <C-t> :TagbarToggle<CR>
 
 "Flake8 settings"
-autocmd BufWritePost *.py call Flake8()
+"autocmd BufWritePost *.py call Flake8()
 autocmd FileType python map <buffer> <leader>f :call Flake8()<CR>
 
 "set syntastic to passive on python
@@ -169,3 +180,24 @@ let g:syntastic_mode_map = {
         \ "mode": "active",
         \ "active_filetypes": [],
         \ "passive_filetypes": ["python"] }
+
+"customize airline
+let g:airline_section_y ='%{kite#statusline()}'
+
+"kite docs shortcut
+nmap <silent> <buffer> <C-k> <Plug>(kite-docs)
+
+"fix spacing function
+function! Fix_spacing()
+	%s/\<\(if\|for\|while\|switch\)(\s*/\1 (/ge     " if (
+	%s/\((\) \(\S\)/\1\2/ge                         " no space after (
+	%s/\n\n\n\+/\r\r/ge                             " single empty line
+	%s/\([,;]\)\(\S\)/\1 \2/ge                      " space after, ;
+	%s/\(\S\) \([,;)]\)/\1\2/ge                     " no space before, ;)
+	%s/\s*$//ge                                     " no terminal space
+endfunction
+
+"Ack settings"
+cnoreabbrev Ack Ack!
+nnoremap <leader>a :Ack!<Space>
+
